@@ -1,0 +1,84 @@
+\section{Network Attacks}
+
+In each of these attacks, three virtual machines were placed on a virtual network with a virtual DHCP server. Each one
+was assigned an IP address in the range 192.168.0.122-192.168.0.124 inclusive. Unless stated otherwise, whenever a
+client or server is mentioned the server is running netcat at address 192.168.0.124 on port 4444, and the client is
+attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l -p 4444}, and the
+client runs {\tt nc 192.168.0.124 4444}.
+
+\subsection{ARP Poisoning and ICMP Redirection}
+
+Both of these attacks achieve roughly the same goal -- deceiving victims about the state of the network. The system's
+ARP cache records information on which device holds what network address. Usually, when two devices want to communicate
+to each other, an ARP request is broadcast to the entire network, and the relevant device responds with its MAC address.
+This process can be subverted by continually sending fake responses, declaring false information about the mapping from
+network addresses to hardware addresses. {\tt netwox 80 -e 08:00:27:10:42:0A -i 192.168.0.124} repeatedly sends a forged
+ARP response, delcaring that address 192.168.0.0 belongs to device 08:00:27:10:42:0A. If 192.168.0.122 then attempts to
+ping 192.168.0.0, it will send out an ARP request, find a response stating that the device exists, and then attempt to
+send ping packets to it. However, in this network this address does not exist, so the packets will go nowhere and the
+sender will hang. Occasionally the sender will send out another ARP request, suspecting that the state of the network
+may have changed and that the packets should be routed to a different device, but it will quickly pick up one of the
+fake responses and continue with its futile operation. This, however, creates a very noisy network. It is fairly easy to
+spot someone sending a large number of unsolicited ARP responses and take appropriate action. Running {\tt arp -n} on
+any machine on the network will show that address 192.168.0.0 exists, and that it belongs to 08:00:27:10:42:0A. When,
+however, the attacker stops sending these forged ARP responses, the network will quickly return to normal, and packets
+will be routed to the correct devices.
+
+Far more subtle is the ICMP Redirect attack. On a large network, where devices may not necessarily be directly connected
+to each other, it is necessary to find routes through the network from host to host, via intermediate routers. In the
+virtual network to which the virtual machines are connected, a direct route exists from each host to each other host. An
+adversary listening on the network cannot pick up any traffic that is not intended for him.
+
+%Picture of deaf adversary goes here
+
+When the state of a network changes, a redirect packet is broadcast, advising hosts of the new ``best" route to a
+destination. These packets can, of course, be spoofed. The command {\tt netwox 86 -d eth6 -g 192.168.0.123} will cause
+an adversary to listen for any network activity on the network that {\tt eth6} is connected to, and when some is
+detected will send a redirect packet suggesting that the data should be routed through 192.168.0.123 instead. Options
+also exist that allow an attacker to respond only to certain traffic. An adversary can advise the network that the best
+route to any host is directly through him, allowing him to read any network traffic that is sent between hosts on the
+network.
+
+%Picture of adversary listening to traffic goes here
+
+This allows an adversary to read anything that his targets attempt to send to each other, until the routing table is
+updated again Since the routing table is only updated when the route to the target host changes, the effects of such an
+attack can persist for a very long time. Insecure protocols like Telnet can leak logon credentials in the plain, as well
+as the contents of any files that a client reads.
+
+\subsection{SYN Flooding}
+
+In ordinary usage, to form a TCP connection a client sends a SYN packet to synchronise clocks with the server,
+containing a sequence number, $S_c$, which can be any arbitrary value. The server responds with a SYN/ACK packet,
+containing a sequence number $S_s$, and an acknowledgement number, $A_s = S_c+1$. The client then returns an ACK packet
+to acknowledge this synchronisation containing an acknowledgement number $A_c = S_s+1$, and start the connection. If a
+server wants to allow multiple connections, which servers usually do, it will need to store the state of multiple TCP
+sessions in memory. If a server has too many active sessions, then it will be unable to accept any more, denying any
+services it might offer to legitimate clients. This is called a SYN flood. Netwox tool 76 implements this attack. {\tt
+netwox 76 -i 192.168.0.124 -p 4444} will repeatedly send SYN packets to port 4444 of host 192.168.0.124, with randomised
+sender addresses. The server will respond to each of these connections with the requisite SYN/ACK, then store the state
+of these connections in a buffer. With the SYN cookie disabled, when that buffer fills it'll simply discard the oldest
+connection, ignoring any connections sent in whilst it discards. If a legitimate client then attempts to access the
+server, it'll find that the server is too busy handling the malicious requests, and have its own request pushed off the
+end of the buffer. The server will forget about the client, and the client will eventually give up on the connection,
+returning a timeout.
+
+When the SYN cookie is enabled, however, connections can be established without a problem. A SYN cookie places
+restrictions on the valid ACK numbers that can be sent back to the server by a client. When the server receives a SYN
+packet, rather than picking an arbitrary $S_s$, it picks an $S_s$ such that the first 5 bits are a slowly incrementing
+timestamp, $t$, the next 3 bits encode the maximum segment Size, and the final 24 bits encode an easy to compute secure
+hash function of the client's address and port number, the server's address and port number, and the value of the
+timestamp $t$. The server can then completely forget about this connection. When the client responds with $A_c$, the
+server can recompute the preceding and compare it to $A_c-1$. If they match, then the connection must have been started
+legitimately, and the server can respond to it. Since the timestamp increases slowly -- $t$ increments once every 64
+seconds is typical -- it is reasonable for the server to assume that the client will have responded within the same time
+window. It is not infeasible for the server to also compute all the necessary data for timestamp $t-1$, to cover the
+case where a connection straddles two windows.
+
+The use of a SYN cookie allows the server to store no information whatsoever about the state of partially completed
+connections, so no resources are consumed by incomplete connections. As an aside, when the server was running Wireshark
+as a background process, the cost of redrawing the GUI as rapidly as packets were being sent caused the system to
+completely lock up. It is not impossible for a sufficiently low-power device running sufficiently misconfigured logging
+software to be completely disabled by such an attack.
+
+\subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
