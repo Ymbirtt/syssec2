@@ -116,3 +116,50 @@ by the server is rejected by the legitimate client. This includes the standard l
 unless he knows the symptoms of such an attack, will just think that the server has crashed. An aware server could
 probably detect the two incoming streams of telnet traffic, and possibly be able to send out an RST packet to abort the
 connection, but a better solution is to use a secure remote shell, like ssh.
+
+
+\section{Cross-site Scripting}
+
+The setup for this section is basically identical to what is given in the spec. The first two sections, displaying an
+irritating alert and displaying an alert that shows the user's cookie, were both fairly simple. The attack gets
+interesting at the third section.
+
+\subsection{Stealing Cookies and Impersonating Users}
+
+When a user logs in legitimately, they are issued with a cookie which they then send to the server with every HTTP POST
+request to authorise themselves. The attacker can make a post containing the malicious script given in the question, and
+whenever a user's browser views this post, it executes the javascript. The particular piece of javascript given in the
+question connects to the attacker on port 5555, and attempts to retrieve an image from him. The URL contains a query
+string which is designed to set the variable {\tt c} in any PHP running on the attacker's host to a particular value.
+This particular value just happens to be the user's cookie. With the BASH command {\tt nc -l -p 5555}, the attacker can
+listen for any incoming data, decode it, and print it to the terminal. By adding a little more to the script, various
+other pieces of information like the user's pseudonym can be recovered, and the incoming packets can be sniffed to give
+their IP address for spoofing. This allows the attacker to choose who he's impersonating if, for instance, he wants to
+pose as the administrator.
+
+Once the cookie has been acquired, Wireshark can be used to carve out the exact details of the requisite HTTP POST
+requests for submitting replies and threads to the forum. By inspecting the contents of a validly made request, we can
+modify the provided Java program to submit the correct packet. The server will only accept a cookie if it originates
+from the same IP address as the legitimate login, presumably by encoding a hash of the original address somewhere
+within, so for this attack the malicious requests were sent from the same computer as the legitimate login. In a
+real-world attack, it would be feasible to spoof the sender IP addresses on these packets instead.
+
+%Put code and screenshots here
+
+\subsection{The Sunshine and Rainbows Worm}
+
+Browsers are arbitrary code execution platforms. An attacker can write some javascript to essentially perform the same
+task as the Java from the previous stage, which will then send packets from the victim's computer to the server, meaning
+that spoofed packets are no longer necessary. This can cause an innocent forum user viewing a malicious thread to
+immediately create a new thread, without their knowledge. The specific malicious code is as follows:
+
+%POOT CODE HERE
+
+This code will steal the user's cookie, and submit a request to the server to create a new thread containing exactly the
+worm itself -- working under the assumption that no other element on the page bears the id ``sunshineAndRainbows". This
+quickly floods the forum with meaningless posts, rendering it mostly unusable. An admin opening the thread to attempt to
+delete it will find that their browser immediately executes the javascript, creating a new thread. Though in this
+particular case the only result is a defacement of the website, such an attack could be used to download malicious files
+to a user's computer, redirect users to other websites, delete user accounts whenever they view the thread, or wreak any
+other form of havoc.
+
