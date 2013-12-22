@@ -119,7 +119,7 @@ During a telnet session, this causes both hosts to hang up, believing something 
 outcome is observed during an ssh session. Attacking a video streaming application is non-trivial on Ubuntu 9.04. Most
 video streaming websites rely on Adobe Flash. There are no easy to find legacy builds of Adobe Flash available for such
 an old operating system, so instead a video streaming application was simulated using netcat, fortune and cowsay;
-specifically with the BASH command {\tt while [ 1 ] do; fortune | cowsay -f dragon; done | nc -l -p 4444}. An RST packet
+specifically with the BASH command {\tt while [ 1 ]; do fortune | cowsay -f dragon; done | nc -l -p 4444}. An RST packet
 had the expected effect of terminating this connection for both the server and the client.
 
 An alternative example is the {\tt tcpkill} program, part of the \emph{DSNIFF} suite of tools. Where inter-machine
@@ -132,6 +132,14 @@ per the screenshot provided.\ref{fig:tcpkill}
     \caption{tcpkill being used to choke connections to the server}
     \label{fig:tcpkill}
 \end{figure}
+
+\subsection{Source Quenching and Blind Reset}
+
+A source quench packet %cite the RFC
+is used when a host is receiving too much traffic, and requests that other hosts slow down their transmissions.
+
+I was not able to make either of these attacks work on my network. Neither telnet, ftp, nor netcat reacted to being sent 
+http://www.rfc-editor.org/rfc/rfc6633.txt
 
 \subsection{TCP Hijacking}
 
