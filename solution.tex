@@ -27,9 +27,11 @@ however, the attacker stops sending these forged ARP responses, the network will
 will be routed to the correct devices. An alternative example of software that performs these attacks is EtterCap, which
 we used in addition to netwox. \ref{fig:etterarp}
 
-%EtterCap and arp -a Screenshots here \begin{figure}[h] \centering
-\includegraphics[width=.5\linewidth]{images/ettercap.png} \includegraphics[width=.45\linewidth]{images/arp.png}
-\caption{Left: Ettercap is use. Right: Checking the ARP cache before and after} \label{fig:etterarp} \end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.5\linewidth]{images/ettercap.png} \includegraphics[width=.45\linewidth]{images/arp.png}
+    \caption{Left: Ettercap is use. Right: Checking the ARP cache before and after} \label{fig:etterarp} 
+\end{figure}
 
 Far more subtle is the ICMP Redirect attack. On a large network, where devices may not necessarily be directly connected
 to each other, it is necessary to find routes through the network from host to host, via intermediate routers. In the
