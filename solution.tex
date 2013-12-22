@@ -5,8 +5,8 @@
 In each of these attacks, three virtual machines were placed on a virtual network with a virtual DHCP server. Each one
 was assigned an IP address in the range 192.168.0.122-192.168.0.124 inclusive. Unless stated otherwise, whenever a
 client or server is mentioned the server is running netcat at address 192.168.0.124 on port 4444, and the client is
-attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l 4444}, and the
-client runs {\tt nc 192.168.0.124 4444}.
+attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l 4444}, and the client
+runs {\tt nc 192.168.0.124 4444}.
 
 \subsection{ARP Poisoning and ICMP Redirection - MitM Attacks}
 
@@ -24,18 +24,12 @@ fake responses and continue with its futile operation. This, however, creates a 
 spot someone sending a large number of unsolicited ARP responses and take appropriate action. Running {\tt arp -n} on
 any machine on the network will show that address 192.168.0.0 exists, and that it belongs to 08:00:27:10:42:0A. When,
 however, the attacker stops sending these forged ARP responses, the network will quickly return to normal, and packets
-will be routed to the correct devices.
-An alternative example of software that performs these attacks is EtterCap, which we used in addition to netwox.
-\ref{fig:etterarp}
+will be routed to the correct devices. An alternative example of software that performs these attacks is EtterCap, which
+we used in addition to netwox. \ref{fig:etterarp}
 
-%EtterCap and arp -a Screenshots here
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=.5\linewidth]{images/ettercap.png}
-    \includegraphics[width=.45\linewidth]{images/arp.png}
-    \caption{Left: Ettercap is use. Right: Checking the ARP cache before and after}
-    \label{fig:etterarp}
-\end{figure}
+%EtterCap and arp -a Screenshots here \begin{figure}[h] \centering
+\includegraphics[width=.5\linewidth]{images/ettercap.png} \includegraphics[width=.45\linewidth]{images/arp.png}
+\caption{Left: Ettercap is use. Right: Checking the ARP cache before and after} \label{fig:etterarp} \end{figure}
 
 Far more subtle is the ICMP Redirect attack. On a large network, where devices may not necessarily be directly connected
 to each other, it is necessary to find routes through the network from host to host, via intermediate routers. In the
@@ -59,7 +53,7 @@ updated again. Since the routing table is only updated when the route to the tar
 attack can persist for a very long time. Insecure protocols like Telnet can leak logon credentials in the plain, as well
 as the contents of any files that a client reads.
 
-\subsection{SYN Flooding}
+\subsection{SYN Flooding}\label{sec_synflood}
 
 In ordinary usage, to form a TCP connection a client sends a SYN packet to synchronise clocks with the server,
 containing a sequence number, $S_c$, which can be any arbitrary value. The server responds with a SYN/ACK packet,
@@ -97,12 +91,8 @@ software to be completely disabled by such an attack, even though the network st
 As our alternative tool, we used {\tt hping3 -i u1 -S -p 80 192.168.0.124} to perform a SYN-FLOOD of the `server' on
 port 4444. An section of the wireshark capture is provided.\ref{fig:ws-rst}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png}
-    \caption{Wireshark capture, showing syn-ack exchanges without final 3rd ack}
-    \label{fig:ws-rst}
-\end{figure}
+\begin{figure}[h] \centering \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png} \caption{Wireshark capture,
+showing syn-ack exchanges without final 3rd ack} \label{fig:ws-rst} \end{figure}
 
 \subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
 
@@ -111,42 +101,45 @@ immediately be aborted. Under normal usage, it is usually used to show that a pr
 hosts. If one host crashes, then the other would attempt to continue sending data to it fruitlessly. If, during crash
 recovery, one host responds to the incoming data with an RST packet, the other will know to stop sending data and take
 appropriate action. This is also used to help limit network activity, and shut down connections that are deemed to be
-malicious
+malicious.
 
-In the attack, netwox %WHICH TOOL? 78, right?
-listens for TCP activity on the network, and as soon as packets are sniffed, sends a forged TCP RST to both endpoints.
-During a telnet session, this causes both hosts to hang up, believing something to have happened to the other. The same
-outcome is observed during an ssh session. Attacking a video streaming application is non-trivial on Ubuntu 9.04. Most
-video streaming websites rely on Adobe Flash. There are no easy to find legacy builds of Adobe Flash available for such
-an old operating system, so instead a video streaming application was simulated using netcat, fortune and cowsay;
-specifically with the BASH command {\tt while [ 1 ]; do fortune | cowsay -f dragon; done | nc -l -p 4444}. An RST packet
-had the expected effect of terminating this connection for both the server and the client.
+In the attack, netwox 78 listens for TCP activity on the network and, as soon as packets are sniffed, sends a forged TCP
+RST to both endpoints. During a telnet or ssh session, this causes both hosts to hang up, believing something to have
+happened to the other. The same outcome is observed during an ssh session. Attacking a video streaming application is
+non-trivial on Ubuntu 9.04. Most video streaming websites rely on Adobe Flash. There are no easy to find legacy builds
+of Adobe Flash available for such an old operating system, so instead a video streaming application was simulated using
+netcat, fortune and cowsay; specifically with the BASH command {\tt while [ 1 ]; do fortune | cowsay -f dragon; done |
+nc -l -p 4444}. An RST packet had the expected effect of terminating this connection for both the server and the client.
 
 An alternative example is the {\tt tcpkill} program, part of the \emph{DSNIFF} suite of tools. Where inter-machine
 traffic is visible to others, or has been intercepted via a MitM attack, you can put an embargo on tcp connections as
 per the screenshot provided.\ref{fig:tcpkill}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=.5\linewidth]{images/tcpkill.png}
-    \caption{tcpkill being used to choke connections to the server}
-    \label{fig:tcpkill}
-\end{figure}
+\begin{figure}[h] \centering \includegraphics[width=.5\linewidth]{images/tcpkill.png} \caption{tcpkill being used to
+choke connections to the server} \label{fig:tcpkill} \end{figure}
 
 \subsection{Source Quenching and Blind Reset}
 
-A source quench packet %cite the RFC
-is used when a host is receiving too much traffic, and requests that other hosts slow down their transmissions.
+A source quench packet is used when a host is receiving too much traffic, and requests that other hosts slow down their
+transmissions. RFC762 defines them, stating that a host \emph{should} slow down their transmission rate, sent by either
+a router or a host whose buffer is currently overloaded. RFC1812 (1995) deprecates their sending, and RFC6633 (2012)
+deprecates any application's reactions to a source quench packet. Ubuntu 9.04 was released in 2009, so the use of SQ
+packets was long since deprecated, and reacting to one is optional. Similarly, RFC1122 states that a host \emph{should}
+abort a connection upon receipt of a hard error packet. This also means that such a reaction is optional. ICMP errors
+exist at the internet layer, not the transport layer, and so these error messages are handled by the OS and its
+hardware, not the application. If the attacks were effective, we would expect to see an SQ attack cause a reduction in
+bandwidth across the link, and the blind reset attacks immediately abort connections, similarly to the TCP RST attacks.
+Neither of these effects were observed, so we suspect that the hosts chose not to react to these error packets.
 
-I was not able to make either of these attacks work on my network. Neither telnet, ftp, nor netcat reacted to being sent 
-http://www.rfc-editor.org/rfc/rfc6633.txt
+%PUT PICTURES OF FTP NOT GIVING A DAMN ABOUT MY PUNY SQ PACKETS HERE - EVEN WHEN TRANSMITTING A 1GiB FILE
 
 \subsection{TCP Hijacking}
 
 telnet does not encrypt its communications, and is completely vulnerable to a myriad of attacks. Session hijacking
-intercepts telnet traffic, then sends packets with a spoofed source IP, a valid sequence number, and standard telnet
-traffic. The server cannot tell the difference between this traffic and traffic legitimately sent by the client. This
-allows an attacker to take control of a telnet session and execute arbitrary commands.
+intercepts telnet traffic, then sends packets with a spoofed source IP, a valid sequence number (as described in \S
+\ref{sec_synflood}), and standard telnet traffic. The server cannot tell the difference between this traffic and traffic
+legitimately sent by the client. This allows an attacker to take control of a telnet session and execute arbitrary
+commands.
 
 Though this is theoretically possible using netwox, hand-crafting each individual packet to contain the correct sequence
 number and valid commands, this is very difficult. Tools exist to automate this process, and we downloaded and installed
@@ -157,8 +150,8 @@ sequence numbers to go out of sync, meaning that any traffic sent by him is reje
 by the server is rejected by the legitimate client. This includes the standard logout message. The client will hang and,
 unless he knows the symptoms of such an attack, will just think that the server has crashed. An aware server could
 probably detect the two incoming streams of telnet traffic, and possibly be able to send out an RST packet to abort the
-connection, but a better solution is to use a secure remote shell, like ssh.
-
+connection, but a better solution is to use a secure remote shell, like ssh, which does not fall victim to this kind of
+attack.
 
 \section{Cross-site Scripting}
 
