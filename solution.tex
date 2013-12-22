@@ -25,10 +25,11 @@ spot someone sending a large number of unsolicited ARP responses and take approp
 any machine on the network will show that address 192.168.0.0 exists, and that it belongs to 08:00:27:10:42:0A. When,
 however, the attacker stops sending these forged ARP responses, the network will quickly return to normal, and packets
 will be routed to the correct devices.
-An alternative example software that performs these attacks is EtterCap, which Drum used in place of netwox.
+An alternative example of software that performs these attacks is EtterCap, which we used in addition to netwox.
+\ref{fig:etterarp}
 
 %EtterCap and arp -a Screenshots here
-\begin{figure}
+\begin{figure}[h]
     \centering
     \includegraphics[width=.5\linewidth]{images/ettercap.png}
     \includegraphics[width=.45\linewidth]{images/arp.png}
@@ -91,7 +92,17 @@ The use of a SYN cookie allows the server to store no information whatsoever abo
 connections, so no resources are consumed by incomplete connections. As an aside, when the server was running Wireshark
 as a background process, the cost of redrawing the GUI as rapidly as packets were being sent caused the system to
 completely lock up. It is not impossible for a sufficiently low-power device running sufficiently misconfigured logging
-software to be completely disabled by such an attack.
+software to be completely disabled by such an attack, even though the network stack itself will not hog resources.
+
+As our alternative tool, we used {\tt hping3 -i u1 -S -p 80 192.168.0.124} to perform a SYN-FLOOD of the `server' on
+port 4444. An section of the wireshark capture is provided.\ref{fig:ws-rst}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png}
+    \caption{Wireshark capture, showing syn-ack exchanges without final 3rd ack}
+    \label{fig:ws-rst}
+\end{figure}
 
 \subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
 
@@ -102,7 +113,7 @@ recovery, one host responds to the incoming data with an RST packet, the other w
 appropriate action. This is also used to help limit network activity, and shut down connections that are deemed to be
 malicious
 
-In the attack, netwox %WHICH TOOL?
+In the attack, netwox %WHICH TOOL? 78, right?
 listens for TCP activity on the network, and as soon as packets are sniffed, sends a forged TCP RST to both endpoints.
 During a telnet session, this causes both hosts to hang up, believing something to have happened to the other. The same
 outcome is observed during an ssh session. Attacking a video streaming application is non-trivial on Ubuntu 9.04. Most
@@ -110,6 +121,17 @@ video streaming websites rely on Adobe Flash. There are no easy to find legacy b
 an old operating system, so instead a video streaming application was simulated using netcat, fortune and cowsay;
 specifically with the BASH command {\tt while [ 1 ] do; fortune | cowsay -f dragon; done | nc -l -p 4444}. An RST packet
 had the expected effect of terminating this connection for both the server and the client.
+
+An alternative example is the {\tt tcpkill} program, part of the \emph{DSNIFF} suite of tools. Where inter-machine
+traffic is visible to others, or has been intercepted via a MitM attack, you can put an embargo on tcp connections as
+per the screenshot provided.\ref{fig:tcpkill}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.5\linewidth]{images/tcpkill.png}
+    \caption{tcpkill being used to choke connections to the server}
+    \label{fig:tcpkill}
+\end{figure}
 
 \subsection{TCP Hijacking}
 
