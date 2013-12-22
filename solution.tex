@@ -1,12 +1,14 @@
 \section{Network Attacks}
 
+% We may not need this paragraph to be as big as this. The setup is prescribed in the TCP IP lab document.
+
 In each of these attacks, three virtual machines were placed on a virtual network with a virtual DHCP server. Each one
 was assigned an IP address in the range 192.168.0.122-192.168.0.124 inclusive. Unless stated otherwise, whenever a
 client or server is mentioned the server is running netcat at address 192.168.0.124 on port 4444, and the client is
 attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l 4444}, and the
 client runs {\tt nc 192.168.0.124 4444}.
 
-\subsection{ARP Poisoning and ICMP Redirection}
+\subsection{ARP Poisoning and ICMP Redirection - MitM Attacks}
 
 Both of these attacks achieve roughly the same goal -- deceiving victims about the state of the network. The system's
 ARP cache records information on which device holds what network address. Usually, when two devices want to communicate
@@ -23,6 +25,16 @@ spot someone sending a large number of unsolicited ARP responses and take approp
 any machine on the network will show that address 192.168.0.0 exists, and that it belongs to 08:00:27:10:42:0A. When,
 however, the attacker stops sending these forged ARP responses, the network will quickly return to normal, and packets
 will be routed to the correct devices.
+An alternative example software that performs these attacks is EtterCap, which Drum used in place of netwox.
+
+%EtterCap and arp -a Screenshots here
+\begin{figure}
+    \centering
+    \includegraphics[width=.5\linewidth]{images/ettercap.png}
+    \includegraphics[width=.45\linewidth]{images/arp.png}
+    \caption{Left: Ettercap is use. Right: Checking the ARP cache before and after}
+    \label{fig:etterarp}
+\end{figure}
 
 Far more subtle is the ICMP Redirect attack. On a large network, where devices may not necessarily be directly connected
 to each other, it is necessary to find routes through the network from host to host, via intermediate routers. In the
@@ -42,7 +54,7 @@ network.
 %Picture of adversary listening to traffic goes here
 
 This allows an adversary to read anything that his targets attempt to send to each other, until the routing table is
-updated again Since the routing table is only updated when the route to the target host changes, the effects of such an
+updated again. Since the routing table is only updated when the route to the target host changes, the effects of such an
 attack can persist for a very long time. Insecure protocols like Telnet can leak logon credentials in the plain, as well
 as the contents of any files that a client reads.
 
