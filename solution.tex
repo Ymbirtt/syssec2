@@ -3,7 +3,7 @@
 In each of these attacks, three virtual machines were placed on a virtual network with a virtual DHCP server. Each one
 was assigned an IP address in the range 192.168.0.122-192.168.0.124 inclusive. Unless stated otherwise, whenever a
 client or server is mentioned the server is running netcat at address 192.168.0.124 on port 4444, and the client is
-attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l -p 4444}, and the
+attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l 4444}, and the
 client runs {\tt nc 192.168.0.124 4444}.
 
 \subsection{ARP Poisoning and ICMP Redirection}
