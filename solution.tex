@@ -90,28 +90,28 @@ of these connections in a buffer. With the SYN cookie disabled, when that buffer
 connection, ignoring any connections sent in whilst it discards. If a legitimate client then attempts to access the
 server, it'll find that the server is too busy handling the malicious requests, and have its own request pushed off the
 end of the buffer. The server will forget about the client, and the client will eventually give up on the connection,
-returning a timeout.
+returning a timeout\ref{fig:flood_no_cookie}.
 
 \begin{figure}[h]
-    \centering \includegraphics[width=.75\linewidth]{images/syn_flood_during.png}
+    \centering \includegraphics[width=.7\linewidth]{images/syn_flood_during.png}
     \caption{Screenshot the connection pool during a SYN flood attack with cookies disabled}
     \label{fig:flood_no_cookie}
 \end{figure}
 
-When the SYN cookie is enabled, however, connections can be established without a problem. A SYN cookie places
-restrictions on the valid ACK numbers that can be sent back to the server by a client. When the server receives a SYN
-packet, rather than picking an arbitrary $S_s$, it picks an $S_s$ such that the first 5 bits are a slowly incrementing
-timestamp, $t$, the next 3 bits encode the maximum segment Size, and the final 24 bits encode an easy to compute secure
-hash function of the client's address and port number, the server's address and port number, and the value of the
-timestamp $t$. The server can then completely forget about this connection. When the client responds with $A_c$, the
-server can recompute the preceding and compare it to $A_c-1$. If they match, then the connection must have been started
-legitimately, and the server can respond to it. Since the timestamp increases slowly -- $t$ increments once every 64
-seconds is typical -- it is reasonable for the server to assume that the client will have responded within the same time
-window. It is not infeasible for the server to also compute all the necessary data for timestamp $t-1$, to cover the
-case where a connection straddles two windows.
+When the SYN cookie is enabled, however, connections can be established without a problem\ref{fig:flood_with_cookie}.
+A SYN cookie places restrictions on the valid ACK numbers that can be sent back to the server by a client. When the
+server receives a SYN packet, rather than picking an arbitrary $S_s$, it picks an $S_s$ such that the first 5 bits are a
+slowly incrementing timestamp, $t$, the next 3 bits encode the maximum segment Size, and the final 24 bits encode an
+easy to compute secure hash function of the client's address and port number, the server's address and port number, and
+the value of the timestamp $t$. The server can then completely forget about this connection. When the client responds
+with $A_c$, the server can recompute the preceding and compare it to $A_c-1$. If they match, then the connection must
+have been started legitimately, and the server can respond to it. Since the timestamp increases slowly -- $t$ increments
+once every 64 seconds is typical -- it is reasonable for the server to assume that the client will have responded within
+the same time window. It is not infeasible for the server to also compute all the necessary data for timestamp $t-1$, to
+cover the case where a connection straddles two windows.
 
 \begin{figure}[h]
-    \centering \includegraphics[width=.75\linewidth]{images/syn_flood_cookie.png}
+    \centering \includegraphics[width=.7\linewidth]{images/syn_flood_cookie.png}
     \caption{Screenshot the connection pool during a SYN flood attack with cookies enabled}
     \label{fig:flood_with_cookie}
 \end{figure}
