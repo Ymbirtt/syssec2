@@ -30,7 +30,7 @@ we used in addition to netwox. \ref{fig:etterarp}
 \begin{figure}[h]
     \centering
     \includegraphics[width=.5\linewidth]{images/ettercap.png} \includegraphics[width=.45\linewidth]{images/arp.png}
-    \caption{Left: Ettercap is use. Right: Checking the ARP cache before and after} \label{fig:etterarp} 
+    \caption{Left: Ettercap is use. Right: Checking the ARP cache before and after} \label{fig:etterarp}
 \end{figure}
 
 Far more subtle is the ICMP Redirect attack. On a large network, where devices may not necessarily be directly connected
@@ -46,7 +46,15 @@ an adversary to listen for any network activity on the network that {\tt eth6} i
 detected will send a redirect packet suggesting that the data should be routed through 192.168.0.123 instead. Options
 also exist that allow an attacker to respond only to certain traffic. An adversary can advise the network that the best
 route to any host is directly through him, allowing him to read any network traffic that is sent between hosts on the
-network.
+network. Despite the configuration of the virtual network making this attack harder, we can see the ICMP redirect
+packets in a ping response between client and server. In the example shown, the `server' has advertised it is the best
+route to all hosts. When we ping it from the client, we can see these ICMP packets being returned at every step.\ref{fig:pingdirect}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.5\linewidth]{images/pingresp.png}
+    \caption{Seeing the ICMP redirects. One is highlighted.} \label{fig:pingdirect}
+\end{figure}
 
 %Picture of adversary listening to traffic goes here
 
