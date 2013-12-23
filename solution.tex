@@ -213,7 +213,7 @@ from the same IP address as the legitimate login, presumably by encoding a hash 
 within, so for this attack the malicious requests were sent from the same computer as the legitimate login. In a
 real-world attack, it would be feasible to spoof the sender IP addresses on these packets instead.
 
-%Put code and screenshots here
+\lstinputlisting{./HTTPSimpleForce.java}
 
 \subsection{The Sunshine and Rainbows Worm}
 
@@ -222,7 +222,7 @@ task as the Java from the previous stage, which will then send packets from the 
 that spoofed packets are no longer necessary. This can cause an innocent forum user viewing a malicious thread to
 immediately create a new thread, without their knowledge. The specific malicious code is as follows:
 
-\begin{lstlisting}[caption=The Sunshine And Rainbows Worm]
+\begin{lstlisting}[caption=A human-readable version of the Sunshine and Rainbows worm]
 //Place a giant image in the post, so we're not just posting nothing
 <img src=http://i.imgur.com/B4kPQ.jpg>
 
@@ -263,6 +263,12 @@ immediately create a new thread, without their knowledge. The specific malicious
 </script>
 \end{lstlisting}
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.8\linewidth]{images/sunshine_and_rainbows.png}
+    \caption{The malicious post made to the forum, infecting it with the worm}
+\end{figure}
+
 This code will steal the user's cookie, and submit a request to the server to create a new thread containing exactly the
 worm itself -- working under the assumption that no other element on the page bears the id ``sunshineAndRainbows". This
 quickly floods the forum with meaningless posts, rendering it mostly unusable. An admin opening the thread to attempt to
@@ -270,4 +276,10 @@ delete it will find that their browser immediately executes the javascript, crea
 particular case the only result is a defacement of the website, such an attack could be used to download malicious files
 to a user's computer, redirect users to other websites, delete user accounts whenever they view the thread, or wreak any
 other form of havoc.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.8\linewidth]{images/xss_victory.png}
+    \caption{The result of an infected thread being repeatedly viewed}
+\end{figure}
 
