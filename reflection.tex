@@ -1,8 +1,13 @@
-\subsection{TCP \& IP Attacks}
-Many of the attacks in this lab take advantage of old, or bad, default configurations for network stacks.
-Even the SYN-FLOOD task description explains the countermeasures you must disable for the attack to have any effect at
-all. ICMP redirection is easily preventable and detectable. ARP poisoning is easily detectable as well.
+\subsection{TCP \& IP Attacks} 
+
+Many of the attacks in this lab take advantage of old, or bad, default configurations for network stacks. Even the SYN-
+FLOOD task description explains the countermeasures you must disable for the attack to have any effect at all. ICMP
+redirection is easily preventable and detectable. ARP poisoning is easily detectable as well.
 
 \subsection{XSS Attacks}
-Attacks such as XSS are easily mitigated\cite{cheatsheet}, and are largely found in badly maintained, old or poorly written web sites
-and applications.
+
+Attacks such as XSS are easily mitigated\cite{cheatsheet}, and are largely found in badly maintained, old or poorly
+written web sites and applications. If they are not mitigated, however, then relying on measures such as sandboxing or
+client-side security is not always feasible. XSS exploits the trust a user's browser has in the website it is viewing,
+and the more powerful the javascript engines and browsers  become, the more essential it is that websites are
+trustworthy.
