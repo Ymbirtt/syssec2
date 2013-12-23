@@ -38,7 +38,11 @@ to each other, it is necessary to find routes through the network from host to h
 virtual network to which the virtual machines are connected, a direct route exists from each host to each other host. An
 adversary listening on the network cannot pick up any traffic that is not intended for him.
 
-%Picture of deaf adversary goes here
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.7\linewidth]{images/icmp_redirect_before.png}
+    \caption{We cannot sniff traffic when it is routed normally} \label{fig:icmp_before}
+\end{figure}
 
 When the state of a network changes, a redirect packet is broadcast, advising hosts of the new ``best" route to a
 destination. These packets can, of course, be spoofed. The command {\tt netwox 86 -d eth6 -g 192.168.0.123} will cause
@@ -47,16 +51,23 @@ detected will send a redirect packet suggesting that the data should be routed t
 also exist that allow an attacker to respond only to certain traffic. An adversary can advise the network that the best
 route to any host is directly through him, allowing him to read any network traffic that is sent between hosts on the
 network. Despite the configuration of the virtual network making this attack harder, we can see the ICMP redirect
-packets in a ping response between client and server. In the example shown, the `server' has advertised it is the best
-route to all hosts. When we ping it from the client, we can see these ICMP packets being returned at every step.\ref{fig:pingdirect}
+packets in a ping response between client and server.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=.5\linewidth]{images/pingresp.png}
-    \caption{Seeing the ICMP redirects. One is highlighted.} \label{fig:pingdirect}
-\end{figure}
+% In the example shown, the `server' has advertised it is the best
+% route to all hosts. When we ping it from the client, we can see these ICMP packets being returned at every step.\ref{fig:pingdirect}
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=.5\linewidth]{images/pingresp.png}
+%     \caption{Seeing the ICMP redirects. One is highlighted.} \label{fig:pingdirect}
+% \end{figure}
 
 %Picture of adversary listening to traffic goes here
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.7\linewidth]{images/icmp_redirect_after.png}
+    \caption{We can sniff traffic when it is all routed through us first} \label{fig:icmp_after}
+\end{figure}
 
 This allows an adversary to read anything that his targets attempt to send to each other, until the routing table is
 updated again. Since the routing table is only updated when the route to the target host changes, the effects of such an
