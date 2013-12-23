@@ -1,8 +1,9 @@
 \subsection{TCP \& IP Attacks}
 
-Many of the attacks in this lab take advantage of old, or bad, default configurations for network stacks. Even the SYN-
-FLOOD task description explains the countermeasures you must disable for the attack to have any effect at all. ICMP
-redirection is easily preventable and detectable. ARP poisoning is easily detectable as well.
+Many of the attacks in this lab take advantage of old, or bad, default configurations for network stacks. Even the
+SYN-FLOOD task description explains the countermeasures you must disable for the attack to have any effect at all. ICMP
+redirection is largely preventable with nothing more than proper configuration\cite{sysctl}.
+ARP poisoning is easily detectable as well, with tools such as Snort freely available\cite{snort}\cite{snort_arp}.
 
 \subsection{XSS Attacks}
 
