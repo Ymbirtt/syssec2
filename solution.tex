@@ -92,6 +92,12 @@ server, it'll find that the server is too busy handling the malicious requests, 
 end of the buffer. The server will forget about the client, and the client will eventually give up on the connection,
 returning a timeout.
 
+\begin{figure}[h]
+    \centering \includegraphics[width=.75\linewidth]{images/syn_flood_during.png}
+    \caption{Screenshot the connection pool during a SYN flood attack with cookies disabled}
+    \label{fig:flood_no_cookie}
+\end{figure}
+
 When the SYN cookie is enabled, however, connections can be established without a problem. A SYN cookie places
 restrictions on the valid ACK numbers that can be sent back to the server by a client. When the server receives a SYN
 packet, rather than picking an arbitrary $S_s$, it picks an $S_s$ such that the first 5 bits are a slowly incrementing
@@ -104,6 +110,12 @@ seconds is typical -- it is reasonable for the server to assume that the client 
 window. It is not infeasible for the server to also compute all the necessary data for timestamp $t-1$, to cover the
 case where a connection straddles two windows.
 
+\begin{figure}[h]
+    \centering \includegraphics[width=.75\linewidth]{images/syn_flood_cookie.png}
+    \caption{Screenshot the connection pool during a SYN flood attack with cookies enabled}
+    \label{fig:flood_with_cookie}
+\end{figure}
+
 The use of a SYN cookie allows the server to store no information whatsoever about the state of partially completed
 connections, so no resources are consumed by incomplete connections. As an aside, when the server was running Wireshark
 as a background process, the cost of redrawing the GUI as rapidly as packets were being sent caused the system to
@@ -111,7 +123,7 @@ completely lock up. It is not impossible for a sufficiently low-power device run
 software to be completely disabled by such an attack, even though the network stack itself will not hog resources.
 
 As our alternative tool, we used {\tt hping3 -i u1 -S -p 80 192.168.0.124} to perform a SYN-FLOOD of the `server' on
-port 4444. An section of the wireshark capture is provided.\ref{fig:ws-rst}
+port 4444. An section of the wireshark capture is also provided.\ref{fig:ws-rst}
 
 \begin{figure}[h] \centering \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png} \caption{Wireshark capture,
 showing syn-ack exchanges without final 3rd ack} \label{fig:ws-rst} \end{figure}
@@ -210,7 +222,6 @@ task as the Java from the previous stage, which will then send packets from the 
 that spoofed packets are no longer necessary. This can cause an innocent forum user viewing a malicious thread to
 immediately create a new thread, without their knowledge. The specific malicious code is as follows:
 
-%POOT CODE HERE
 \begin{lstlisting}[caption=The Sunshine And Rainbows Worm]
 //Place a giant image in the post, so we're not just posting nothing
 <img src=http://i.imgur.com/B4kPQ.jpg>
