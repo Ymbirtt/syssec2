@@ -8,7 +8,7 @@ client or server is mentioned the server is running netcat at address 192.168.0.
 attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l 4444}, and the client
 runs {\tt nc 192.168.0.124 4444}.
 
-\subsection{ARP Poisoning and ICMP Redirection - MitM Attacks}
+\subsection{ARP Poisoning and ICMP Redirection -- MitM Attacks}
 
 Both of these attacks achieve roughly the same goal -- deceiving victims about the state of the network. The system's
 ARP cache records information on which device holds what network address. Usually, when two devices want to communicate
@@ -63,7 +63,6 @@ network.
 %     \caption{Seeing the ICMP redirects. One is highlighted.} \label{fig:pingdirect}
 % \end{figure}
 
-%Picture of adversary listening to traffic goes here
 \begin{figure}[h]
     \centering
     \includegraphics[width=.7\linewidth]{images/icmp_redirect_after.png}
@@ -88,31 +87,33 @@ netwox 76 -i 192.168.0.124 -p 4444} will repeatedly send SYN packets to port 444
 sender addresses. The server will respond to each of these connections with the requisite SYN/ACK, then store the state
 of these connections in a buffer. With the SYN cookie disabled, when that buffer fills it'll simply discard the oldest
 connection, ignoring any connections sent in whilst it discards. If a legitimate client then attempts to access the
-server, it'll find that the server is too busy handling the malicious requests, and have its own request pushed off the
-end of the buffer. The server will forget about the client, and the client will eventually give up on the connection,
-returning a timeout\ref{fig:flood_no_cookie}.
+server, it'll find that the server is too busy handling the malicious requests as in figure \ref{fig:flood_no_cookie},
+and have its own request pushed off the end of the buffer. The server will forget about the client, and the client will
+eventually give up on the connection, returning a timeout.
 
 \begin{figure}[h]
     \centering \includegraphics[width=.7\linewidth]{images/syn_flood_during.png}
-    \caption{Screenshot the connection pool during a SYN flood attack with cookies disabled}
+    \caption{Result of {\tt watch}ing the connection pool during a SYN flood attack with cookies disabled -- clients
+    cannot reliably connect to the server in this state}
     \label{fig:flood_no_cookie}
 \end{figure}
 
-When the SYN cookie is enabled, however, connections can be established without a problem\ref{fig:flood_with_cookie}.
-A SYN cookie places restrictions on the valid ACK numbers that can be sent back to the server by a client. When the
-server receives a SYN packet, rather than picking an arbitrary $S_s$, it picks an $S_s$ such that the first 5 bits are a
-slowly incrementing timestamp, $t$, the next 3 bits encode the maximum segment Size, and the final 24 bits encode an
-easy to compute secure hash function of the client's address and port number, the server's address and port number, and
-the value of the timestamp $t$. The server can then completely forget about this connection. When the client responds
-with $A_c$, the server can recompute the preceding and compare it to $A_c-1$. If they match, then the connection must
-have been started legitimately, and the server can respond to it. Since the timestamp increases slowly -- $t$ increments
-once every 64 seconds is typical -- it is reasonable for the server to assume that the client will have responded within
-the same time window. It is not infeasible for the server to also compute all the necessary data for timestamp $t-1$, to
-cover the case where a connection straddles two windows.
+When the SYN cookie is enabled, however, connections can be established without a problem, as shown in figure
+\ref{fig:flood_with_cookie}. A SYN cookie places restrictions on the valid ACK numbers that can be sent back to the
+server by a client. When the server receives a SYN packet, rather than picking an arbitrary $S_s$, it picks an $S_s$
+such that the first 5 bits are a slowly incrementing timestamp, $t$, the next 3 bits encode the maximum segment Size,
+and the final 24 bits encode an easy to compute secure hash function of the client's address and port number, the
+server's address and port number, and the value of the timestamp $t$. The server can then completely forget about this
+connection. When the client responds with $A_c$, the server can recompute the preceding and compare it to $A_c-1$. If
+they match, then the connection must have been started legitimately, and the server can respond to it. Since the
+timestamp increases slowly -- once every 64 seconds is typical -- it is reasonable for the server to
+assume that the client will have responded within the same time window. It is not infeasible for the server to also
+compute all the necessary data for timestamp $t-1$, to cover the case where a connection straddles two windows.
 
 \begin{figure}[h]
     \centering \includegraphics[width=.7\linewidth]{images/syn_flood_cookie.png}
-    \caption{Screenshot the connection pool during a SYN flood attack with cookies enabled}
+    \caption{As in figure \ref{fig:flood_no_cookie}, but with cookies enabled -- the client has successfully connected to
+    the server}
     \label{fig:flood_with_cookie}
 \end{figure}
 
@@ -125,17 +126,21 @@ software to be completely disabled by such an attack, even though the network st
 As our alternative tool, we used {\tt hping3 -i u1 -S -p 80 192.168.0.124} to perform a SYN-FLOOD of the `server' on
 port 4444. An section of the wireshark capture is also provided.\ref{fig:ws-rst}
 
-\begin{figure}[h] \centering \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png} \caption{Wireshark capture,
-showing syn-ack exchanges without final 3rd ack} \label{fig:ws-rst} \end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png}
+    \caption{Wireshark capture, showing syn-ack exchanges without final 3rd ack}
+    \label{fig:ws-rst}
+\end{figure}
 
 \subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
 
-Each TCP packet contains an RST flag. If this flag is set to 1, then the packet declares that the connection should
-immediately be aborted. Under normal usage, it is usually used to show that a problem has occurred with one of the
-hosts. If one host crashes, then the other would attempt to continue sending data to it fruitlessly. If, during crash
-recovery, one host responds to the incoming data with an RST packet, the other will know to stop sending data and take
-appropriate action. This is also used to help limit network activity, and shut down connections that are deemed to be
-malicious.
+Each TCP packet contains an RST flag. RFC793 states that all hosts must process the RST field of every incoming packet
+(p26), and that if such a packet is received with a valid sequence number, a host must close the connection (p37). Under
+normal usage, it is usually used to show that a problem has occurred with one of the hosts. If one host crashes, then
+the other would attempt to continue sending data to it fruitlessly. If, during crash recovery, one host responds to the
+incoming data with an RST packet, the other will know to stop sending data and take appropriate action. This is also
+used to help limit network activity, and shut down connections that are deemed to be malicious.
 
 In the attack, netwox 78 listens for TCP activity on the network and, as soon as packets are sniffed, sends a forged TCP
 RST to both endpoints. During a telnet or ssh session, this causes both hosts to hang up, believing something to have
@@ -149,8 +154,12 @@ An alternative example is the {\tt tcpkill} program, part of the \emph{DSNIFF} s
 traffic is visible to others, or has been intercepted via a MitM attack, you can put an embargo on tcp connections as
 per the screenshot provided.\ref{fig:tcpkill}
 
-\begin{figure}[h] \centering \includegraphics[width=.5\linewidth]{images/tcpkill.png} \caption{tcpkill being used to
-choke connections to the server} \label{fig:tcpkill} \end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.5\linewidth]{images/tcpkill.png}
+    \caption{tcpkill being used to choke connections to the server}
+    \label{fig:tcpkill}
+\end{figure}
 
 \subsection{Source Quenching and Blind Reset}
 
@@ -163,9 +172,17 @@ abort a connection upon receipt of a hard error packet. This also means that suc
 exist at the internet layer, not the transport layer, and so these error messages are handled by the OS and its
 hardware, not the application. If the attacks were effective, we would expect to see an SQ attack cause a reduction in
 bandwidth across the link, and the blind reset attacks immediately abort connections, similarly to the TCP RST attacks.
-Neither of these effects were observed, so we suspect that the hosts chose not to react to these error packets.
+Neither of these effects were observed, figure \ref{fig:ftp_sq} shows one such attempt, so we suspect that the hosts
+chose not to react to these error packets.
 
-%PUT PICTURES OF FTP NOT GIVING A DAMN ABOUT MY PUNY SQ PACKETS HERE - EVEN WHEN TRANSMITTING A 1GiB FILE
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.5\linewidth]{images/ftp_vs_sq.png}
+    \caption{Transferring a 1 GiB file to a host via ftp, both with and without source quench packets being sent. Both
+    transfers took the same time to complete. Other screenshots of telnet, scp, nc, etc under this attack were similarly
+    uninteresting.}
+    \label{fig:ftp_sq}
+\end{figure}
 
 \subsection{TCP Hijacking}
 
