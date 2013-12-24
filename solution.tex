@@ -8,7 +8,7 @@ client or server is mentioned the server is running netcat at address 192.168.0.
 attempting to connect to it from address 192.168.0.122. Specifically, the server runs {\tt nc -l 4444}, and the client
 runs {\tt nc 192.168.0.124 4444}.
 
-\subsection{ARP Poisoning and ICMP Redirection - MitM Attacks}
+\subsection{ARP Poisoning and ICMP Redirection -- MitM Attacks}
 
 Both of these attacks achieve roughly the same goal -- deceiving victims about the state of the network. The system's
 ARP cache records information on which device holds what network address. Usually, when two devices want to communicate
@@ -106,7 +106,7 @@ and the final 24 bits encode an easy to compute secure hash function of the clie
 server's address and port number, and the value of the timestamp $t$. The server can then completely forget about this
 connection. When the client responds with $A_c$, the server can recompute the preceding and compare it to $A_c-1$. If
 they match, then the connection must have been started legitimately, and the server can respond to it. Since the
-timestamp increases slowly -- $t$ increments once every 64 seconds is typical -- it is reasonable for the server to
+timestamp increases slowly -- once every 64 seconds is typical -- it is reasonable for the server to
 assume that the client will have responded within the same time window. It is not infeasible for the server to also
 compute all the necessary data for timestamp $t-1$, to cover the case where a connection straddles two windows.
 
@@ -135,12 +135,12 @@ port 4444. An section of the wireshark capture is also provided.\ref{fig:ws-rst}
 
 \subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
 
-Each TCP packet contains an RST flag. If this flag is set to 1, then the packet declares that the connection should
-immediately be aborted. Under normal usage, it is usually used to show that a problem has occurred with one of the
-hosts. If one host crashes, then the other would attempt to continue sending data to it fruitlessly. If, during crash
-recovery, one host responds to the incoming data with an RST packet, the other will know to stop sending data and take
-appropriate action. This is also used to help limit network activity, and shut down connections that are deemed to be
-malicious.
+Each TCP packet contains an RST flag. RFC793 states that all hosts must process the RST field of every incoming packet
+(p26), and that if such a packet is received with a valid sequence number, a host must close the connection (p37). Under
+normal usage, it is usually used to show that a problem has occurred with one of the hosts. If one host crashes, then
+the other would attempt to continue sending data to it fruitlessly. If, during crash recovery, one host responds to the
+incoming data with an RST packet, the other will know to stop sending data and take appropriate action. This is also
+used to help limit network activity, and shut down connections that are deemed to be malicious.
 
 In the attack, netwox 78 listens for TCP activity on the network and, as soon as packets are sniffed, sends a forged TCP
 RST to both endpoints. During a telnet or ssh session, this causes both hosts to hang up, believing something to have
