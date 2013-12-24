@@ -25,7 +25,7 @@ spot someone sending a large number of unsolicited ARP responses and take approp
 any machine on the network will show that address 192.168.0.0 exists, and that it belongs to 08:00:27:10:42:0A. When,
 however, the attacker stops sending these forged ARP responses, the network will quickly return to normal, and packets
 will be routed to the correct devices. An alternative example of software that performs these attacks is
-EtterCap\ref{fig:etterarp}, which we used in addition to netwox.
+EtterCap[\ref{fig:etterarp}], which we used in addition to netwox.
 
 \begin{figure}[h]
     \centering
@@ -135,7 +135,7 @@ port 4444. An section of the wireshark capture is also provided.\ref{fig:ws-rst}
 
 \subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
 
-Each TCP packet contains an RST flag. RFC793 states that all hosts must process the RST field of every incoming packet
+Each TCP packet contains an RST flag. RFC793\cite{rfc793} states that all hosts must process the RST field of every incoming packet
 (p26), and that if such a packet is received with a valid sequence number, a host must close the connection (p37). Under
 normal usage, it is usually used to show that a problem has occurred with one of the hosts. If one host crashes, then
 the other would attempt to continue sending data to it fruitlessly. If, during crash recovery, one host responds to the
@@ -164,10 +164,10 @@ per the screenshot provided.\ref{fig:tcpkill}
 \subsection{Source Quenching and Blind Reset}
 
 A source quench packet is used when a host is receiving too much traffic, and requests that other hosts slow down their
-transmissions. RFC762 defines them, stating that a host \emph{should} slow down their transmission rate, sent by either
-a router or a host whose buffer is currently overloaded. RFC1812 (1995) deprecates their sending, and RFC6633 (2012)
+transmissions. RFC762\cite{rfc0762} defines them, stating that a host \emph{should} slow down their transmission rate, sent by either
+a router or a host whose buffer is currently overloaded. RFC1812\cite{rfc1812} (1995) deprecates their sending, and RFC6633\cite{rfc6633} (2012)
 deprecates any application's reactions to a source quench packet. Ubuntu 9.04 was released in 2009, so the use of SQ
-packets was long since deprecated, and reacting to one is optional. Similarly, RFC1122 states that a host \emph{should}
+packets was long since deprecated, and reacting to one is optional. Similarly, RFC1122\cite{rfc1122} states that a host \emph{should}
 abort a connection upon receipt of a hard error packet. This also means that such a reaction is optional. ICMP errors
 exist at the internet layer, not the transport layer, and so these error messages are handled by the OS and its
 hardware, not the application. If the attacks were effective, we would expect to see an SQ attack cause a reduction in
