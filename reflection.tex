@@ -11,4 +11,9 @@ Attacks such as XSS are easily mitigated\cite{cheatsheet}, and are largely found
 written web sites and applications. If they are not mitigated, however, then relying on measures such as sandboxing or
 client-side security is not always feasible. XSS exploits the trust a user's browser has in the website it is viewing,
 and the more powerful the javascript engines and browsers become, the more essential it is that websites are
-trustworthy.
+trustworthy. Various popular internet forums take countermeasures of varying levels of sophistication against attempts
+at XSS attacks -- some forums have scripts running which immediately ban users for posting replies containing
+anything that might be used for code injection whilst others replace such symbols with amusing strings of text. Indeed,
+the attack itself contains code that can be used to prevent it -- calling the {\tt escape()} function over any strings
+that are submitted to the server will replace unsafe characters such as {\tt <} with escaped variants, which cannot be
+used to inject code into a web page.
