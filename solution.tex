@@ -25,12 +25,13 @@ spot someone sending a large number of unsolicited ARP responses and take approp
 any machine on the network will show that address 192.168.0.0 exists, and that it belongs to 08:00:27:10:42:0A. When,
 however, the attacker stops sending these forged ARP responses, the network will quickly return to normal, and packets
 will be routed to the correct devices. An alternative example of software that performs these attacks is
-EtterCap \ref{fig:etterarp}, which we used in addition to netwox.
+EtterCap, as in figure \ref{fig:etterarp}, which we used in addition to netwox.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=.5\linewidth]{images/ettercap.png} \includegraphics[width=.45\linewidth]{images/arp.png}
-    \caption{Left: Ettercap is use. Right: Checking the ARP cache before and after} \label{fig:etterarp}
+    \caption{Left: Ettercap in use. Right: Checking the ARP cache before and after}
+    \label{fig:etterarp}
 \end{figure}
 
 Far more subtle is the ICMP Redirect attack. On a large network, where devices may not necessarily be directly connected
@@ -71,15 +72,16 @@ network.
 
 This allows an adversary to read anything that his targets attempt to send to each other, until the routing table is
 updated again. Since the routing table is only updated when the route to the target host changes, the effects of such an
-attack can persist for a very long time. Insecure protocols like Telnet can leak logon credentials in the plain, as well
-as the contents of any files that a client reads.
+attack can persist for a very long time. Insecure protocols like telnet and ftp can leak logon credentials in the plain,
+as well as the contents of any files that a client reads.
 
 \subsection{SYN Flooding}\label{sec_synflood}
 
 In ordinary usage, to form a TCP connection a client sends a SYN packet to synchronise clocks with the server,
 containing a sequence number, $S_c$, which can be any arbitrary value. The server responds with a SYN/ACK packet,
 containing a sequence number $S_s$, and an acknowledgement number, $A_s = S_c+1$. The client then returns an ACK packet
-to acknowledge this synchronisation containing an acknowledgement number $A_c = S_s+1$, and start the connection. If a
+to acknowledge this synchronisation containing an acknowledgement number $A_c = S_s+1$, and start the connection,
+accompanying packets with increasing SYN/ACK numbers to account for the possibility of packets arriving out of order. If a
 server wants to allow multiple connections, which servers usually do, it will need to store the state of multiple TCP
 sessions in memory. If a server has too many active sessions, then it will be unable to accept any more, denying any
 services it might offer to legitimate clients. This is called a SYN flood. Netwox tool 76 implements this attack. {\tt
@@ -123,24 +125,15 @@ as a background process, the cost of redrawing the GUI as rapidly as packets wer
 completely lock up. It is not impossible for a sufficiently low-power device running sufficiently misconfigured logging
 software to be completely disabled by such an attack, even though the network stack itself will not hog resources.
 
-% % As our alternative tool, we used {\tt hping3 -i u1 -S -p 80 192.168.0.124} to perform a SYN-FLOOD of the `server' on
-% % port 4444. An section of the wireshark capture is also provided.\ref{fig:ws-rst}
-
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png}
-%     \caption{Wireshark capture, showing syn-ack exchanges without final 3rd ack}
-%     \label{fig:ws-rst}
-% \end{figure}
-
 \subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
 
-Each TCP packet contains an RST flag. RFC793\cite{rfc793} states that all hosts must process the RST field of every incoming packet
-(p26), and that if such a packet is received with a valid sequence number, a host must close the connection (p37). Under
-normal usage, it is usually used to show that a problem has occurred with one of the hosts. If one host crashes, then
-the other would attempt to continue sending data to it fruitlessly. If, during crash recovery, one host responds to the
-incoming data with an RST packet, the other will know to stop sending data and take appropriate action. This is also
-used to help limit network activity, and shut down connections that are deemed to be malicious.
+Each TCP packet contains an RST flag. RFC793 states that all hosts must process the RST field of every incoming packet
+\cite[p. 26]{rfc793}, and that if such a packet is received with a valid sequence number, a host must close the
+connection \cite[p. 37]{rfc793}. Under normal usage, it is usually used to show that a problem has occurred with one of
+the hosts. If one host crashes, then the other would attempt to continue sending data to it fruitlessly. If, during
+crash recovery, one host responds to the incoming data with an RST packet, the other will know to stop sending data and
+take appropriate action. This is also used to help limit network activity, and shut down connections that are deemed to
+be malicious.
 
 In the attack, netwox 78 listens for TCP activity on the network and, as soon as packets are sniffed, sends a forged TCP
 RST to both endpoints. During a telnet or ssh session, this causes both hosts to hang up, believing something to have
@@ -148,11 +141,12 @@ happened to the other. The same outcome is observed during an ssh session. Attac
 non-trivial on Ubuntu 9.04. Most video streaming websites rely on Adobe Flash. There are no easy to find legacy builds
 of Adobe Flash available for such an old operating system, so instead a video streaming application was simulated using
 netcat, fortune and cowsay; specifically with the BASH command {\tt while [ 1 ]; do fortune | cowsay -f dragon; done |
-nc -l -p 4444}. An RST packet had the expected effect of terminating this connection for both the server and the client.
+nc -l -p 4444}, which results in a TCP connection containing a large amount of constantly changing traffic. An RST
+packet had the expected effect of terminating this connection for both the server and the client.
 
 An alternative example is the {\tt tcpkill} program, part of the \emph{DSNIFF} suite of tools. Where inter-machine
-traffic is visible to others, or has been intercepted via a MitM attack, you can put an embargo on tcp connections as
-per the screenshot provided.\ref{fig:tcpkill}
+traffic is visible to others, or has been intercepted via a MitM attack, an embargo can be placed upon tcp connections as
+per figure \ref{fig:tcpkill}.
 
 \begin{figure}[h]
     \centering
@@ -164,16 +158,16 @@ per the screenshot provided.\ref{fig:tcpkill}
 \subsection{Source Quenching and Blind Reset}
 
 A source quench packet is used when a host is receiving too much traffic, and requests that other hosts slow down their
-transmissions. RFC762\cite{rfc0762} defines them, stating that a host \emph{should} slow down their transmission rate, sent by either
-a router or a host whose buffer is currently overloaded. RFC1812\cite{rfc1812} (1995) deprecates their sending, and RFC6633\cite{rfc6633} (2012)
-deprecates any application's reactions to a source quench packet. Ubuntu 9.04 was released in 2009, so the use of SQ
-packets was long since deprecated, and reacting to one is optional. Similarly, RFC1122\cite{rfc1122} states that a host \emph{should}
-abort a connection upon receipt of a hard error packet. This also means that such a reaction is optional. ICMP errors
-exist at the internet layer, not the transport layer, and so these error messages are handled by the OS and its
-hardware, not the application. If the attacks were effective, we would expect to see an SQ attack cause a reduction in
-bandwidth across the link, and the blind reset attacks immediately abort connections, similarly to the TCP RST attacks.
-Neither of these effects were observed, figure \ref{fig:ftp_sq} shows one such attempt, so we suspect that the hosts
-chose not to react to these error packets.
+transmissions. RFC762\cite{rfc762} originally defined them, stating that a host \emph{should} slow down their
+transmission rate, sent by either a router or a host whose buffer is currently overloaded. RFC1812\cite{rfc1812} (1995)
+deprecates their sending, and RFC6633\cite{rfc6633} (2012) deprecates any application's reactions to a source quench
+packet. Ubuntu 9.04 was released in 2009, so the use of SQ packets was long since deprecated, and reacting to one is
+optional. Similarly, RFC1122\cite{rfc1122} states that a host \emph{should} abort a connection upon receipt of a hard
+error packet. This also means that such a reaction is optional. ICMP errors exist at the internet layer, not the
+transport layer, and so these error messages are handled by the OS and its hardware, not the application. If the attacks
+were effective, we would expect to see an SQ attack cause a reduction in bandwidth across the link, and the blind reset
+attacks immediately abort connections, similarly to the TCP RST attacks.  Neither of these effects were observed, figure
+\ref{fig:ftp_sq} shows one such attempt, so we suspect that the hosts chose not to react to these error packets.
 
 \begin{figure}[h]
     \centering
