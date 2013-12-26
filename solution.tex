@@ -25,7 +25,7 @@ spot someone sending a large number of unsolicited ARP responses and take approp
 any machine on the network will show that address 192.168.0.0 exists, and that it belongs to 08:00:27:10:42:0A. When,
 however, the attacker stops sending these forged ARP responses, the network will quickly return to normal, and packets
 will be routed to the correct devices. An alternative example of software that performs these attacks is
-EtterCap[\ref{fig:etterarp}], which we used in addition to netwox.
+EtterCap \ref{fig:etterarp}, which we used in addition to netwox.
 
 \begin{figure}[h]
     \centering
@@ -123,15 +123,15 @@ as a background process, the cost of redrawing the GUI as rapidly as packets wer
 completely lock up. It is not impossible for a sufficiently low-power device running sufficiently misconfigured logging
 software to be completely disabled by such an attack, even though the network stack itself will not hog resources.
 
-As our alternative tool, we used {\tt hping3 -i u1 -S -p 80 192.168.0.124} to perform a SYN-FLOOD of the `server' on
-port 4444. An section of the wireshark capture is also provided.\ref{fig:ws-rst}
+% % As our alternative tool, we used {\tt hping3 -i u1 -S -p 80 192.168.0.124} to perform a SYN-FLOOD of the `server' on
+% % port 4444. An section of the wireshark capture is also provided.\ref{fig:ws-rst}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png}
-    \caption{Wireshark capture, showing syn-ack exchanges without final 3rd ack}
-    \label{fig:ws-rst}
-\end{figure}
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=.75\linewidth]{images/ws-rst-crop.png}
+%     \caption{Wireshark capture, showing syn-ack exchanges without final 3rd ack}
+%     \label{fig:ws-rst}
+% \end{figure}
 
 \subsection{TCP RST Attacks on telnet, ssh and ``video streaming"}
 

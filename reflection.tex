@@ -15,7 +15,11 @@ currently only possible against legacy systems.
 TCP session hijacking merely highlights the need for encryption whilst managing a system remotely. Using telnet and ftp
 is currently highly discouraged -- indeed an internet search for how to set these services up generally results in a
 large warning at the start of the tutorial suggesting that SSH and scp are used instead -- though some real-world
-systems still use these old unencrypted methods of communication.
+systems still use these old unencrypted methods of communication. It is worth noting that the IPSEC protocol, whether
+implemented in v4 or v6, protects against man-in-the-middle attacks, and makes it harder for attackers to spoof their
+IP addresses, which aids in preventing Denial Of Service attacks.\cite{rfc2401}
+IPv6 itself is only more secure than IPv4 because conformant implementations must include IPSEC, which
+is not the case for IPv4.
 
 \subsection{XSS Attacks}
 
@@ -32,4 +36,3 @@ used to inject code into a web page. Newer versions of phpBB do this as standard
 that make it difficult for a webmaster to allow these issues to occur. The fact that various posts on the phpBB support
 forums seem confused by this suggest that there may be some niche forums run by more naive admins who are not aware of
 this, but the potential impact of these vulnerabilities is hard to judge.
-
