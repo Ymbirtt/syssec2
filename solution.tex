@@ -37,7 +37,8 @@ EtterCap, as in figure \ref{fig:etterarp}, which we used in addition to netwox.
 Far more subtle is the ICMP Redirect attack. On a large network, where devices may not necessarily be directly connected
 to each other, it is necessary to find routes through the network from host to host, via intermediate routers. In the
 virtual network to which the virtual machines are connected, a direct route exists from each host to each other host. An
-adversary listening on the network cannot pick up any traffic that is not intended for him.
+adversary listening on the network cannot pick up any traffic that is not intended for him, as shown in figure
+\ref{fig:icmp_before}.
 
 \begin{figure}[h]
     \centering
@@ -72,9 +73,16 @@ network.
 
 This allows an adversary to read anything that his targets attempt to send to each other, until the routing table is
 updated again. Since the routing table is only updated when the route to the target host changes, the effects of such an
-attack can persist for a very long time. Insecure protocols like telnet and ftp can leak logon credentials in the plain,
-as well as the contents of any files that a client reads.
+attack can persist for a very long time. Insecure protocols like telnet and ftp can leak logon credentials in the plain
+as in figure \ref{fig:telnet_sucks}, as well as the contents of any files that a client reads.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics{images/telnet_sucks.png}
+    \caption{Running Wireshark after an ICMP redirect attack, whilst one host logs into the other, leaks a username and
+    password in the plain}
+    \label{fig:telnet_sucks}
+\end{figure}
 \subsection{SYN Flooding}\label{sec_synflood}
 
 In ordinary usage, to form a TCP connection a client sends a SYN packet to synchronise clocks with the server,
